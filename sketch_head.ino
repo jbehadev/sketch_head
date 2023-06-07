@@ -19,6 +19,7 @@ Copyright 2017 Jeremy Beha
 #define NECKSWIVEL 3
 #define EventSpan 25
 #define TIMESPAN 400
+#define CYCLESYNC 4
 
 class HeadEvent {
   public:
@@ -372,7 +373,6 @@ R[Brightness][R][G][B]|: Right eye
 D[Val]Z|: duration for event in cycles
 E: End Event
 */
-
 void processEvent(char* buf, int buf_index) {
   // current state
   HeadEvent currentState = head->getCurrentState();
@@ -402,21 +402,24 @@ void processEvent(char* buf, int buf_index) {
     switch(statement[0]) {
       case 'S':
         desiredState.neckSwivel = atoi(statement + 1);
-        //Serial.println("Added swivel event");
         break;
       case 'T':
         desiredState.neckTilt = atoi(statement + 1);
         break;
       case 'L':
         desiredState.leftEyeBrightness = statement[1];
+        desiredState.leftEyeColor[0] = statement[2];
+        desiredState.leftEyeColor[1] = statement[3];
+        desiredState.leftEyeColor[2] = statement[4];
         break;
       case 'R':
         desiredState.rightEyeBrightness = statement[1];
+        desiredState.rightEyeColor[0] = statement[2];
+        desiredState.rightEyeColor[1] = statement[3];
+        desiredState.rightEyeColor[2] = statement[4];
         break;
       case 'D':
-        desiredState.duration = atoi(statement + 1);
-        //Serial.print(F("Added duration event for "));
-        //Serial.println(String(desiredState.duration));
+        desiredState.duration = ceil(atoi(statement + 1)/CYCLESYNC);
         break;
     }
     delete []statement;
@@ -425,6 +428,8 @@ void processEvent(char* buf, int buf_index) {
   // create events to get there
   float neckSwivelVelocity = float(desiredState.neckSwivel-currentState.neckSwivel)/desiredState.duration;
   float neckTiltVelocity = float(desiredState.neckTilt-currentState.neckTilt)/desiredState.duration;
+  float leftEyeBrightnessVelocity = float(desiredState.leftEyeBrightness-currentState.leftEyeBrightness)/desiredState.duration;
+  float rightEyeBrightnessVelocity = float(desiredState.rightEyeBrightness-currentState.rightEyeBrightness)/desiredState.duration;
 
   for(int t=0;t < desiredState.duration; t++) {
     HeadEvent temp_event;
@@ -433,6 +438,15 @@ void processEvent(char* buf, int buf_index) {
       temp_event.neckSwivel = currentState.neckSwivel + (neckSwivelVelocity*t);
     if(desiredState.neckTilt != currentState.neckTilt)
       temp_event.neckTilt = currentState.neckTilt + (neckTiltVelocity*t);
+    if(desiredState.leftEyeColor != currentState.leftEyeColor) 
+       memcpy(temp_event.leftEyeColor, desiredState.leftEyeColor, sizeof(head->defaultColor));
+    if(desiredState.leftEyeBrightness != currentState.leftEyeBrightness)
+      temp_event.leftEyeBrightness = currentState.leftEyeBrightness + (leftEyeBrightnessVelocity*t);
+    if(desiredState.rightEyeColor != currentState.rightEyeColor) 
+       memcpy(temp_event.rightEyeColor, desiredState.rightEyeColor, sizeof(head->defaultColor));
+    if(desiredState.rightEyeBrightness != currentState.rightEyeBrightness)
+      temp_event.rightEyeBrightness = currentState.rightEyeBrightness + (rightEyeBrightnessVelocity*t);
+
     head->events.push_back(temp_event);
 
     if(mu_freeRam() < 500) {
@@ -445,13 +459,17 @@ void processEvent(char* buf, int buf_index) {
 char buf[100] = "\0";
 int buf_index = 0;
 bool buildEvent = false;
-
+int cycle = 0;
 void loop() {
+
   int receivedValue;
-  if(buildEvent == false) {
+  if(buildEvent == false && cycle == CYCLESYNC) {
     head->processQueue();
   }
-
+  if(cycle == CYCLESYNC) {
+    cycle = 0;
+  }
+  cycle++;
   if(Serial.available() > 0) {
     buildEvent = true;
     receivedValue = Serial.read();
