@@ -1,10 +1,10 @@
 // QList - Version: Latest 
 #include <QList.h>
-#include <QList.cpp>
 
 // Adafruit NeoPixel - Version: Latest 
 #include <Adafruit_NeoPixel.h>
 #include <Servo.h>
+#include <MemoryUsage.h>
 
 
 /*
@@ -16,23 +16,29 @@ Copyright 2017 Jeremy Beha
 #define EYELEFT 7
 #define EYERIGHT 5
 #define NECKTILT 9
+#define NECKSWIVEL 3
 #define EventSpan 25
 #define TIMESPAN 400
 
 class HeadEvent {
   public:
     unsigned char neckTilt = 0;
+    unsigned char neckSwivel = 0;
     unsigned char leftEyeColor[3] = {1,1,1};
     unsigned char rightEyeColor[3] = {1,1,1};
     unsigned char leftEyeBrightness = 0;
     unsigned char rightEyeBrightness = 0; 
+    unsigned short duration = 0;
 };
 
 class Head {
   public:
     // neck servo
-    const int neckUpLimit = 175;
-    const int neckDownLimit = 30;
+    const int neckUpLimit = 240;
+    const int neckDownLimit = 0;
+
+    const int neckLeftLimit = 180;
+    const int neckRightLimit = 0;
     
     // eyes
     const int defaultBrightness = 10;
@@ -45,13 +51,32 @@ class Head {
     Adafruit_NeoPixel leftEye = Adafruit_NeoPixel(1, EYELEFT, NEO_GRB + NEO_KHZ800);
     Adafruit_NeoPixel rightEye = Adafruit_NeoPixel(1, EYERIGHT, NEO_GRB + NEO_KHZ800);
     Servo neckTilt; 
+    Servo neckSwivel;
     bool busy = false;
     
     void init() {
       // initialize event queue
-      this->fillQueue();
+      //this->fillQueue();
       this->initEyes();
       this->initNeck();
+    }
+
+    HeadEvent getCurrentState() {
+      HeadEvent currentState;
+      currentState.neckSwivel = this->neckSwivel.read();
+      currentState.neckTilt = this->neckTilt.read();
+      currentState.rightEyeBrightness = this->rightEye.getBrightness();
+      currentState.leftEyeBrightness = this->leftEye.getBrightness();
+      uint32_t rightColor = this->rightEye.getPixelColor(0);
+      currentState.rightEyeColor[0] = (rightColor >> 16) & 0xFF;
+      currentState.rightEyeColor[1] = (rightColor >> 8) & 0xFF;
+      currentState.rightEyeColor[2] = rightColor & 0xFF;
+      uint32_t leftColor = this->rightEye.getPixelColor(0);
+      currentState.leftEyeColor[0] = (leftColor >> 16) & 0xFF;
+      currentState.leftEyeColor[1] = (leftColor >> 8) & 0xFF;
+      currentState.leftEyeColor[2] = leftColor & 0xFF;
+      
+      return currentState;
     }
     
     void fillQueue() {
@@ -65,6 +90,8 @@ class Head {
     void initNeck() {
       this->neckTilt.attach(NECKTILT);
       this->neckTilt.write((this->neckUpLimit+this->neckDownLimit)/2);
+      this->neckSwivel.attach(NECKSWIVEL);
+      this->neckSwivel.write((this->neckLeftLimit+this->neckRightLimit)/2);
     }
     
     void initEyes() {
@@ -82,9 +109,27 @@ class Head {
     
     void processQueue() {
       bool eyeActivity[2] = {false, false};
+      if(!this->events.size()) {
+        return;
+      }
       HeadEvent currentEvent = this->events.front();
       if(currentEvent.neckTilt > 0) {
-        this->neckTilt.write(currentEvent.neckTilt);
+        Serial.print(F("Tilting head to "));
+        Serial.println(String(currentEvent.neckTilt));
+        if(currentEvent.neckTilt > this->neckUpLimit)
+          this->neckTilt.write(this->neckUpLimit);
+        else
+          this->neckTilt.write(currentEvent.neckTilt);
+      }
+      if(currentEvent.neckSwivel > 0) {
+        //Serial.print(F("Swiveling head to "));
+        //Serial.println(String(currentEvent.neckSwivel));
+        if(currentEvent.neckSwivel > this->neckLeftLimit)
+          this->neckSwivel.write(this->neckLeftLimit);
+        else if(currentEvent.neckSwivel < this->neckRightLimit)
+          this->neckSwivel.write(this->neckRightLimit);
+        else
+          this->neckSwivel.write(currentEvent.neckSwivel);
       }
       if(currentEvent.leftEyeBrightness > 0) {
         this->leftEye.setBrightness(currentEvent.leftEyeBrightness);
@@ -110,9 +155,9 @@ class Head {
       }
       
       this->events.pop_front();
-      if(!this->events.size()) {
-        this->fillQueue();
-      }
+      //if(!this->events.size()) {
+        //this->fillQueue();
+      //}
       delay(EventSpan);
     }
         
@@ -261,15 +306,16 @@ int actionWill = 0;
 int eye;
 unsigned char *color;
 void setup() {
-  //Serial.begin(9600);
-  //Serial.println("Starting");
+  Serial.begin(9600);
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
+  Serial.println("Starting");
   randomSeed(analogRead(0));
   head->init();
 }
 
-void loop() {
-  head->processQueue();
-  
+void causeRandomEvent() {
   actionWill = random(0,101);
   if(!head->busy) {
     switch(actionWill) {
@@ -313,6 +359,113 @@ void loop() {
         head->busy = true;
         head->addYesEvent(0, random(1,5));
         break;
+    } 
+  }
+}
+
+/*
+Protocol:
+S[Val]|: Swivel
+T[Val]|: Tilt
+L[Brightness][R][G][B]|: Left eye
+R[Brightness][R][G][B]|: Right eye
+D[Val]Z|: duration for event in cycles
+E: End Event
+*/
+
+void processEvent(char* buf, int buf_index) {
+  // current state
+  HeadEvent currentState = head->getCurrentState();
+  // desired state
+  HeadEvent desiredState;
+  QList<char*> states;
+  char *state;
+  state = new char[10];
+  int state_index = 0;
+  for(int cur = 0; cur < buf_index; cur++) {
+    if(buf[cur] == '|') {
+      state[state_index] = '\0';
+      states.push_back(state);
+      state = new char[10];
+      state_index = 0;
+    }
+    else {
+      state[state_index++] = buf[cur];
+    }
+  }
+
+
+  char *statement;
+  while(states.size()) {
+    statement = states.front();
+    states.pop_front();
+    switch(statement[0]) {
+      case 'S':
+        desiredState.neckSwivel = atoi(statement + 1);
+        //Serial.println("Added swivel event");
+        break;
+      case 'T':
+        desiredState.neckTilt = atoi(statement + 1);
+        break;
+      case 'L':
+        desiredState.leftEyeBrightness = statement[1];
+        break;
+      case 'R':
+        desiredState.rightEyeBrightness = statement[1];
+        break;
+      case 'D':
+        desiredState.duration = atoi(statement + 1);
+        //Serial.print(F("Added duration event for "));
+        //Serial.println(String(desiredState.duration));
+        break;
+    }
+    delete []statement;
+  }
+
+  // create events to get there
+  float neckSwivelVelocity = float(desiredState.neckSwivel-currentState.neckSwivel)/desiredState.duration;
+  float neckTiltVelocity = float(desiredState.neckTilt-currentState.neckTilt)/desiredState.duration;
+
+  for(int t=0;t < desiredState.duration; t++) {
+    HeadEvent temp_event;
+    // neck swivel
+    if(desiredState.neckSwivel != currentState.neckSwivel)
+      temp_event.neckSwivel = currentState.neckSwivel + (neckSwivelVelocity*t);
+    if(desiredState.neckTilt != currentState.neckTilt)
+      temp_event.neckTilt = currentState.neckTilt + (neckTiltVelocity*t);
+    head->events.push_back(temp_event);
+
+    if(mu_freeRam() < 500) {
+      Serial.println(F("Error, cannot add more to queue because of memory"));
+      return;
+    }
+  }
+}
+
+char buf[100] = "\0";
+int buf_index = 0;
+bool buildEvent = false;
+
+void loop() {
+  int receivedValue;
+  if(buildEvent == false) {
+    head->processQueue();
+  }
+
+  if(Serial.available() > 0) {
+    buildEvent = true;
+    receivedValue = Serial.read();
+    
+    if(receivedValue != 'E') {
+      buf[buf_index] = receivedValue;
+      buf_index++;
+    }
+    else {
+      processEvent(buf, buf_index);
+
+      buildEvent = false;
+      buf_index = 0;
+      buf[0] = '\0';
     }
   }
 }
