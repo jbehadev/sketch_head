@@ -4,7 +4,7 @@ import sys
 from nicegui import ui
 
 
-arduino = serial.Serial(port='/dev/ttyAMA0', baudrate=9600, timeout=1)
+arduino = serial.Serial(port='/dev/ttyACM0', baudrate=9600, timeout=1)
 def write_read(x):
     if type(x) == int:
         arduino.write(x.to_bytes(1, sys.byteorder))
