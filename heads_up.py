@@ -2,6 +2,7 @@ import serial
 import time
 import sys
 import argparse
+import random
 from nicegui import app,ui
 
 
@@ -35,7 +36,7 @@ def index():
     def write_list(event_list):
         [write_read(ev) for ev in event_list]
 
-    def createEvent():
+    def create_event():
         event = []
         # left eye color
         left_eye_color = tuple(int(left_color_picker.value.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
@@ -63,7 +64,33 @@ def index():
         event.append('|')
         event.append('E')
         return event
-
+    
+    def create_random_event():
+        event = []
+        # left eye color
+        event.append('L')
+        event.append(random.randrange(1,250))
+        event.append(random.randrange(1,250))
+        event.append(random.randrange(1,250))
+        event.append(random.randrange(1,250))
+        event.append('|')
+        event.append('R')
+        event.append(random.randrange(1,250))
+        event.append(random.randrange(1,250))
+        event.append(random.randrange(1,250))
+        event.append(random.randrange(1,250))
+        event.append('|')
+        event.append('T')
+        event.append(ascii(random.randrange(1,250)))
+        event.append('|')
+        event.append('S')
+        event.append(ascii(random.randrange(1,250)))
+        event.append('|')
+        event.append('D')
+        event.append(ascii(random.randrange(50,200)))
+        event.append('|')
+        event.append('E')
+        return event
 
     def play_event(event):
         ui.notify(event)
@@ -85,7 +112,7 @@ def index():
 
     def save_event(dialog):
         nonlocal saved_events
-        saved_events.append({'name': saved_event_name, 'event': createEvent()})
+        saved_events.append({'name': saved_event_name, 'event': create_event()})
         event_table.update()
         dialog.close()
         app.storage.user['saved_events'] = saved_events
@@ -95,44 +122,6 @@ def index():
         app.storage.user['saved_events'] = None
         saved_events.clear()
         event_table.update()
-
-    ui.label('Control Fred')
-
-    ui.label('Tilt')
-    with ui.grid(columns=2).classes('w-full'):
-        tilt_slider = ui.slider(min=1, max=220, value=100)
-        ui.label().bind_text_from(tilt_slider, 'value')
-
-    ui.label('Swivel')
-    with ui.grid(columns=2).classes('w-full'):
-        swivel_slider = ui.slider(min=1, max=180, value=90)
-        ui.label().bind_text_from(swivel_slider, 'value')
-
-    with ui.grid(columns=2).classes('w-full'):
-        ui.label('Left Eye')
-        ui.label('Right Eye')
-    with ui.grid(columns=6).classes('w-full'):
-        left_color_picker = ui.color_input(label='Color', value='#ff0000')
-
-        left_brightness_slider = ui.slider(min=0, max=255, value=150)
-        ui.label().bind_text_from(left_brightness_slider, 'value')
-
-        right_color_picker = ui.color_input(label='Color', value='#ff0000')
-
-        right_brightness_slider = ui.slider(min=0, max=255, value=150)
-        ui.label().bind_text_from(right_brightness_slider, 'value')
-
-    with ui.grid(columns=2).classes('w-full'):
-        duration_slider = ui.radio({400: 'Slow', 150: 'Medium', 50: 'Fast'},value=150).props('inline')
-        ui.label().bind_text_from(duration_slider, 'value')
-
-    ui.button('Instruct!', on_click=lambda: play_event(createEvent()))
-
-    with ui.dialog() as dialog, ui.card():
-        ui.input(label='Event Name', on_change=save_event_name)
-        ui.button('Save', on_click=lambda: save_event(dialog))
-
-    ui.button('Save Event', on_click=dialog.open)
 
     columns = [
         {'name': 'name', 'label': 'Name', 'field': 'name', 'required': True, 'align': 'left'},
@@ -146,18 +135,70 @@ def index():
             {'name': 'No', 'event': "S20|D40|ES80|D40|E"},
         ]
 
-    event_table = ui.aggrid({'columnDefs': columns, 'rowData':saved_events})
+    with ui.column():
 
-    def clicked(msg):
-        ui.notify(msg)
+        ui.label('Control Fred')
 
-    event_table.on('cellClicked', lambda s: play_event(s['args']['data']['event']))
+        with ui.card():
+            timer = ui.timer(4, lambda: play_event(create_random_event()))
+            ui.switch('Random event generator', value=False).bind_value_to(timer, 'active')
+            ui.label('Random Event Delay')
+            delay_slider = ui.slider(min=2, max=60, value=4).props('label-always').bind_value_to(timer, 'interval')
 
-    log = ui.log(max_lines=1000).classes('w-full h-20')
+        with ui.card():
+            ui.label('Tilt')
+            with ui.row().classes('w-full'):
+                with ui.grid(columns=3).classes('w-full'):
+                    ui.label(text="Down").classes('text-right')
+                    tilt_slider = ui.slider(min=1, max=220, value=100).props('label-always').classes('w-full')
+                    ui.label(text="Up")
 
-    log.push(arduino.readline().decode())
+            ui.label('Swivel')
+            with ui.row().classes('w-full'):
+                with ui.grid(columns=3).classes('w-full'):
+                    ui.label(text="Left").classes('text-right')
+                    swivel_slider = ui.slider(min=1, max=180, value=90).props('label-always').classes('w-full')
+                    ui.label(text="Right")
 
-    ui.button('Clear Saved Events', on_click=clear_events )
+
+            with ui.row().classes('w-full'):
+                with ui.grid(columns=2).classes('w-full'):
+                    with ui.column():
+                        ui.label('Left Eye')
+                        left_color_picker = ui.color_input(label='Right Color', value='#ff0000').picker.q_color.props('no-header no-footer default-view=palette')
+                        ui.label('Brightness')
+                        left_brightness_slider = ui.slider(min=0, max=255, value=150).props('label-always')
+                    with ui.column():
+                        ui.label('Right Eye')
+                        right_color_picker = ui.color_input(label='Right Color', value='#ff0000').picker.q_color.props('no-header no-footer default-view=palette')
+                        ui.label('Brightness')
+                        right_brightness_slider = ui.slider(min=0, max=255, value=150).props('label-always')
+
+            ui.label('Movement speed')
+            duration_slider = ui.radio({400: 'Slow', 150: 'Medium', 50: 'Fast'},value=150).props('inline')
+
+            ui.button('Instruct!', on_click=lambda: play_event(create_event())).classes('w-full')
+
+        with ui.dialog() as dialog, ui.card():
+            ui.input(label='Event Name', on_change=save_event_name)
+            ui.button('Save', on_click=lambda: save_event(dialog))
+
+        ui.button('Save Event', on_click=dialog.open).classes('w-full')
+
+
+
+        ui.label('Saved Events - Click to play')
+        event_table = ui.aggrid({'columnDefs': columns, 'rowData':saved_events})
+
+        event_table.on('cellClicked', lambda s: play_event(s['args']['data']['event']))
+
+        ui.button('Clear Saved Events', on_click=clear_events )
+
+        ui.label('Event Log')
+        log = ui.log(max_lines=1000).classes('w-full h-20')
+
+        log.push(arduino.readline().decode())
+
 
     
 ui.run(storage_secret="fred")
