@@ -4,7 +4,7 @@ import sys
 import argparse
 import random
 from nicegui import app,ui
-
+from pathlib import Path
 
 arg_parse = argparse.ArgumentParser(add_help=False)
 arg_parse.add_argument('--env', required=True)
@@ -135,9 +135,13 @@ def index():
             {'name': 'No', 'event': "S20|D40|ES80|D40|E"},
         ]
 
+    app.add_static_files('/static', Path(__file__).resolve().parent / 'static')
+
     with ui.column():
 
-        ui.label('Control Fred')
+        with ui.header(elevated=True).style('background-color: #3874c8'):
+            ui.image('/static/fredhead.jpg').style('width:50px')
+            ui.label('Fred Head Control Interface')
 
         with ui.card():
             timer = ui.timer(4, lambda: play_event(create_random_event()))
