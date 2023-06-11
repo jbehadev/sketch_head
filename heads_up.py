@@ -169,12 +169,14 @@ def index():
                 with ui.grid(columns=2).classes('w-full'):
                     with ui.column():
                         ui.label('Left Eye')
-                        left_color_picker = ui.color_input(label='Right Color', value='#ff0000').picker.q_color.props('no-header no-footer default-view=palette')
+                        left_color_picker = ui.color_input(label='Right Color', value='#ff0000')
+                        left_color_picker.picker.q_color.props('no-header no-footer default-view=palette')
                         ui.label('Brightness')
                         left_brightness_slider = ui.slider(min=0, max=255, value=150).props('label-always')
                     with ui.column():
                         ui.label('Right Eye')
-                        right_color_picker = ui.color_input(label='Right Color', value='#ff0000').picker.q_color.props('no-header no-footer default-view=palette')
+                        right_color_picker = ui.color_input(label='Right Color', value='#ff0000')
+                        right_color_picker.picker.q_color.props('no-header no-footer default-view=palette')
                         ui.label('Brightness')
                         right_brightness_slider = ui.slider(min=0, max=255, value=150).props('label-always')
 
