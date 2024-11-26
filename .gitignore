@@ -53,3 +53,5 @@ Mkfile.old
 dkms.conf
 build/
 .vscode/
+
+__pycache__
