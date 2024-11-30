@@ -1,0 +1,222 @@
+[
+  {
+    "emotion": "Happy",
+    "before": {
+      "head": {"yaw": 0, "pitch": 0, "roll": 0},
+      "eyes": {"color": "#FFFF99", "brightness": 0.7}
+    },
+    "after": {
+      "head": {"yaw": 15, "pitch": -10, "roll": 0},
+      "eyes": {"color": "#FFFF00", "brightness": 1.0}
+    }
+  },
+  {
+    "emotion": "Sad",
+    "before": {
+      "head": {"yaw": 0, "pitch": -5, "roll": 0},
+      "eyes": {"color": "#87CEFA", "brightness": 0.5}
+    },
+    "after": {
+      "head": {"yaw": 0, "pitch": 10, "roll": 0},
+      "eyes": {"color": "#0000FF", "brightness": 0.3}
+    }
+  },
+  {
+    "emotion": "Angry",
+    "before": {
+      "head": {"yaw": 0, "pitch": 0, "roll": 5},
+      "eyes": {"color": "#FFA07A", "brightness": 0.6}
+    },
+    "after": {
+      "head": {"yaw": -20, "pitch": 0, "roll": 5},
+      "eyes": {"color": "#FF0000", "brightness": 0.9}
+    }
+  },
+  {
+    "emotion": "Fearful",
+    "before": {
+      "head": {"yaw": 0, "pitch": 5, "roll": 0},
+      "eyes": {"color": "#FFFFFF", "brightness": 0.7}
+    },
+    "after": {
+      "head": {"yaw": -10, "pitch": 15, "roll": 0},
+      "eyes": {"color": "#ADD8E6", "brightness": 1.0}
+    }
+  },
+  {
+    "emotion": "Disgusted",
+    "before": {
+      "head": {"yaw": 5, "pitch": 0, "roll": -5},
+      "eyes": {"color": "#ADFF2F", "brightness": 0.5}
+    },
+    "after": {
+      "head": {"yaw": 15, "pitch": 5, "roll": -10},
+      "eyes": {"color": "#556B2F", "brightness": 0.4}
+    }
+  },
+  {
+    "emotion": "Confused",
+    "before": {
+      "head": {"yaw": 0, "pitch": -5, "roll": 5},
+      "eyes": {"color": "#E0FFFF", "brightness": 0.6}
+    },
+    "after": {
+      "head": {"yaw": 5, "pitch": 0, "roll": 15},
+      "eyes": {"color": "#B0E0E6", "brightness": 0.7}
+    }
+  },
+  {
+    "emotion": "Bored",
+    "before": {
+      "head": {"yaw": -5, "pitch": 5, "roll": 0},
+      "eyes": {"color": "#C0C0C0", "brightness": 0.5}
+    },
+    "after": {
+      "head": {"yaw": -15, "pitch": 10, "roll": 0},
+      "eyes": {"color": "#808080", "brightness": 0.4}
+    }
+  },
+  {
+    "emotion": "Excited",
+    "before": {
+      "head": {"yaw": 10, "pitch": -10, "roll": 0},
+      "eyes": {"color": "#FFA500", "brightness": 0.8}
+    },
+    "after": {
+      "head": {"yaw": 20, "pitch": -15, "roll": 0},
+      "eyes": {"color": "#FF4500", "brightness": 1.0}
+    }
+  },
+  {
+    "emotion": "Sleepy",
+    "before": {
+      "head": {"yaw": 0, "pitch": 10, "roll": 0},
+      "eyes": {"color": "#708090", "brightness": 0.3}
+    },
+    "after": {
+      "head": {"yaw": 0, "pitch": 20, "roll": 0},
+      "eyes": {"color": "#2F4F4F", "brightness": 0.2}
+    }
+  },
+  {
+    "emotion": "Curious",
+    "before": {
+      "head": {"yaw": 5, "pitch": -5, "roll": 5},
+      "eyes": {"color": "#40E0D0", "brightness": 0.6}
+    },
+    "after": {
+      "head": {"yaw": 10, "pitch": -10, "roll": 10},
+      "eyes": {"color": "#00CED1", "brightness": 0.7}
+    }
+  },
+  {
+    "emotion": "Annoyed",
+    "before": {
+      "head": {"yaw": -5, "pitch": 5, "roll": 5},
+      "eyes": {"color": "#CD5C5C", "brightness": 0.5}
+    },
+    "after": {
+      "head": {"yaw": -15, "pitch": 5, "roll": 5},
+      "eyes": {"color": "#8B0000", "brightness": 0.6}
+    }
+  },
+  {
+    "emotion": "Shocked",
+    "before": {
+      "head": {"yaw": 0, "pitch": -10, "roll": 0},
+      "eyes": {"color": "#FFFFFF", "brightness": 0.8}
+    },
+    "after": {
+      "head": {"yaw": 0, "pitch": -25, "roll": 0},
+      "eyes": {"color": "#FFFFFF", "brightness": 1.0}
+    }
+  },
+  {
+    "emotion": "Proud",
+    "before": {
+      "head": {"yaw": 0, "pitch": -5, "roll": 0},
+      "eyes": {"color": "#DAA520", "brightness": 0.7}
+    },
+    "after": {
+      "head": {"yaw": 5, "pitch": -10, "roll": 0},
+      "eyes": {"color": "#FFD700", "brightness": 0.9}
+    }
+  },
+  {
+    "emotion": "Ashamed",
+    "before": {
+      "head": {"yaw": 0, "pitch": 10, "roll": 0},
+      "eyes": {"color": "#FFB6C1", "brightness": 0.5}
+    },
+    "after": {
+      "head": {"yaw": -5, "pitch": 15, "roll": 0},
+      "eyes": {"color": "#FFC0CB", "brightness": 0.4}
+    }
+  },
+  {
+    "emotion": "Anxious",
+    "before": {
+      "head": {"yaw": -5, "pitch": 5, "roll": 0},
+      "eyes": {"color": "#B0C4DE", "brightness": 0.5}
+    },
+    "after": {
+      "head": {"yaw": -10, "pitch": 10, "roll": 0},
+      "eyes": {"color": "#4682B4", "brightness": 0.6}
+    }
+  },
+  {
+    "emotion": "Thoughtful",
+    "before": {
+      "head": {"yaw": 5, "pitch": 0, "roll": 5},
+      "eyes": {"color": "#8FBC8F", "brightness": 0.6}
+    },
+    "after": {
+      "head": {"yaw": 10, "pitch": 0, "roll": 10},
+      "eyes": {"color": "#556B2F", "brightness": 0.5}
+    }
+  },
+  {
+    "emotion": "Amused",
+    "before": {
+      "head": {"yaw": 5, "pitch": -5, "roll": 0},
+      "eyes": {"color": "#FF69B4", "brightness": 0.6}
+    },
+    "after": {
+      "head": {"yaw": 15, "pitch": -10, "roll": 0},
+      "eyes": {"color": "#FF1493", "brightness": 0.8}
+    }
+  },
+  {
+    "emotion": "Love",
+    "before": {
+      "head": {"yaw": 0, "pitch": -5, "roll": 0},
+      "eyes": {"color": "#FF69B4", "brightness": 0.7}
+    },
+    "after": {
+      "head": {"yaw": 5, "pitch": -10, "roll": 0},
+      "eyes": {"color": "#FF1493", "brightness": 1.0}
+    }
+  },
+  {
+    "emotion": "Neutral",
+    "before": {
+      "head": {"yaw": 0, "pitch": 0, "roll": 0},
+      "eyes": {"color": "#FFFFFF", "brightness": 0.5}
+    },
+    "after": {
+      "head": {"yaw": 0, "pitch": 0, "roll": 0},
+      "eyes": {"color": "#FFFFFF", "brightness": 0.5}
+    }
+  },
+  {
+    "emotion": "Surprised",
+    "before": {
+      "head": {"yaw": 0, "pitch": 0, "roll": 0},
+      "eyes": {"color": "#00BFFF", "brightness": 0.5}
+    },
+    "after": {
+      "head": {"yaw": 0, "pitch": -20, "roll": 0},
+      "eyes": {"color": "#FFFFFF", "brightness": 1.0}
+    }
+  }
+]

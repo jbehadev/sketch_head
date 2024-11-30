@@ -16,10 +16,10 @@ class Larynx:
         tts_config = sherpa_onnx.OfflineTtsConfig(
             model=sherpa_onnx.OfflineTtsModelConfig(
                 vits=sherpa_onnx.OfflineTtsVitsModelConfig(
-                    model="vits-piper-en_US-amy-medium/en_US-amy-medium.onnx",
+                    model="models/vits-piper-en_US-amy-medium/en_US-amy-medium.onnx",
                     lexicon="",
-                    tokens="vits-piper-en_US-amy-medium/tokens.txt",
-                    data_dir="vits-piper-en_US-amy-medium/espeak-ng-data"
+                    tokens="models/vits-piper-en_US-amy-medium/tokens.txt",
+                    data_dir="models/vits-piper-en_US-amy-medium/espeak-ng-data"
                 ),
             ),
             max_num_sentences=10,
@@ -48,8 +48,8 @@ class Larynx:
 
     def _play_audio(self, audio):
         # Normalize audio to int16 range
-        audio_int16 = np.int16(audio.samples * 32767)
-        play_obj = sa.play_buffer(audio_int16, 1, 2, audio.sample_rate)
+        #audio_int16 = np.int16(audio.samples * 32767)
+        play_obj = sa.play_buffer(np.array(audio.samples), 1, 2, audio.sample_rate)
         play_obj.wait_done()
 
     def add_response(self, response):

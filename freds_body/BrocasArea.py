@@ -3,7 +3,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 import threading
 import os
-
+from llama_cpp import Llama
 
 class BrocasArea:
     def __init__(self):
@@ -13,9 +13,14 @@ class BrocasArea:
         self.response_thread.daemon = True
         self.stop_event = threading.Event()
 
-        # Load DialoGPT small model
-        self.tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-0.5B-Instruct", token=os.environ.get('HFACE_TOKEN'))
-        self.model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-0.5B-Instruct", token=os.environ.get('HFACE_TOKEN'))
+        self.model = Llama(
+            model_path="models/phi-2.Q8_0.gguf",
+            max_tokens=2048,
+            temperature=0.7,
+            top_p=0.9,
+            stop=None,
+            n_ctx=2048
+        )
 
     def start(self):
         self.response_thread.start()
@@ -30,16 +35,15 @@ class BrocasArea:
                 transcription = self.transcription_queue.get(timeout=1)
             except Empty:
                 continue
-            # Generate response using DialoGPT
-            input_ids = self.tokenizer.encode(transcription + self.tokenizer.eos_token, return_tensors="pt")
-            with torch.no_grad():
-                print('Brocas is thinking')
-
-                output = self.model.generate(input_ids, max_length=50, pad_token_id=self.tokenizer.eos_token_id)
-            response = self.tokenizer.decode(output[:, input_ids.shape[-1]:][0], skip_special_tokens=True)
+            
+            print('Brocas is thinking')
+            llm_response = ""
+            #llm_response = self.model(transcription)
+            for token in self.model(transcription, max_tokens=2048, stream=True):
+                llm_response += token['choices'][0]['text']
 
             # Put the response in the response queue
-            self.response_queue.put(response)
+            self.response_queue.put(llm_response)
 
     def add_transcription(self, transcription):
         self.transcription_queue.put(transcription)

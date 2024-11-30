@@ -55,3 +55,4 @@ build/
 .vscode/
 
 __pycache__
+**/models
