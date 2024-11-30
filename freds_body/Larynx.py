@@ -1,8 +1,10 @@
 import threading
-from queue import Queue
+from queue import Queue, Empty
 import sherpa_onnx
 import simpleaudio as sa
 import numpy as np
+import soundfile as sf
+
 
 SAMPLING_RATE = 16000
 
@@ -38,12 +40,13 @@ class Larynx:
         while not self.stop_event.is_set():
             try:
                 response = self.response_queue.get(timeout=1)
-            except Exception:
+            except Empty:
                 continue
 
             # Convert text to speech using Sherpa-ONNX TTS
             if response:
                 audio = self.tts.generate(response)
+                print(audio)
                 self._play_audio(audio)
 
     def _play_audio(self, audio):
@@ -51,6 +54,7 @@ class Larynx:
         #audio_int16 = np.int16(audio.samples * 32767)
         play_obj = sa.play_buffer(np.array(audio.samples), 1, 2, audio.sample_rate)
         play_obj.wait_done()
+        
 
     def add_response(self, response):
         self.response_queue.put(response)
