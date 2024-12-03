@@ -9,8 +9,8 @@ from moonshine_onnx import MoonshineOnnxModel, load_tokenizer
 SAMPLING_RATE = 16000
 CHUNK_SIZE = 512
 LOOKBACK_CHUNKS = 5
-PAUSE_DURATION = 0.2  # Pause duration in seconds
-MAX_SPEECH_SECS = 15
+PAUSE_DURATION = 0.5  # Pause duration in seconds
+MAX_SPEECH_SECS = 5
 
 class WernickesArea:
     def __init__(self, model_name):
@@ -21,7 +21,7 @@ class WernickesArea:
             model=self.vad_model,
             sampling_rate=SAMPLING_RATE,
             threshold=0.5,
-            min_silence_duration_ms=300,
+            min_silence_duration_ms=700,
         )
 
         self.queue = Queue()
@@ -30,6 +30,7 @@ class WernickesArea:
         self.listening_thread.daemon = True
         self.stop_event = threading.Event()
         self.transcribe_lock = threading.Lock()
+        self.pause = False
 
         self.input_stream = InputStream(
             samplerate=SAMPLING_RATE, 
@@ -59,12 +60,15 @@ class WernickesArea:
 
     def _input_callback(self, indata, frames, time, status):
         if status:
-            print(status)
-        self.queue.put((indata.copy().flatten(), status))
+            print("Status: ", status)
+        if not self.pause:
+            self.queue.put((indata.copy().flatten(), status))
 
     def _transcribe(self, speech):
         with self.transcribe_lock:
+            start = time.time()
             tokens = self.model.generate(speech[np.newaxis, :].astype(np.float32))
+            print(f"Transcription ended in {round(time.time() - start,2)} seconds")
             return self.tokenizer.decode_batch(tokens)[0]
 
     def _listen(self):
@@ -74,9 +78,11 @@ class WernickesArea:
         print("Listening")
 
         while not self.stop_event.is_set():
-            chunk, status = self.queue.get(timeout=1)
-            if status:
-                print(status)
+            try:
+                chunk, status = self.queue.get(timeout=1)
+            except Empty:
+                continue
+            
             speech_buffer = np.concatenate((speech_buffer, chunk))
 
             if not recording:
@@ -93,14 +99,19 @@ class WernickesArea:
                     transcription = self._transcribe(speech_buffer)
                     if "Fred" in transcription:
                         self.transcription_queue.put(transcription)
+                    else:
+                        print(F"Throwing away: {transcription}")
                     speech_buffer = np.zeros(0, dtype=np.float32)
 
             elif recording:
                 if (len(speech_buffer) / SAMPLING_RATE) > MAX_SPEECH_SECS:
+                    print("Speech timeout")
                     recording = False
                     transcription = self._transcribe(speech_buffer)
                     if "Fred" in transcription:
                         self.transcription_queue.put(transcription)
+                    else:
+                        print(F"Throwing away: {transcription}")
                     speech_buffer = np.zeros(0, dtype=np.float32)
                     self._soft_reset()
                 

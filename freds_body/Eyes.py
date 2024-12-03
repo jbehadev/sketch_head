@@ -12,7 +12,7 @@ class Eyes(threading.Thread):
 
         # Servo control ranges
         self.SWIVEL_MIN, self.SWIVEL_MAX = 1, 180
-        self.TILT_MIN, self.TILT_MAX = 1, 240
+        self.TILT_MIN, self.TILT_MAX = 1, 120
 
         # Initial servo positions
         self.swivel_position = (self.SWIVEL_MIN + self.SWIVEL_MAX) // 2
@@ -53,9 +53,10 @@ class Eyes(threading.Thread):
                 offset_x = face_center_x - 640 / 2  # Frame width = 640
                 offset_y = face_center_y - 480 / 2  # Frame height = 480
 
+                print(f"found a face at {offset_x}, {offset_y}")
                 # Map offsets to servo positions
-                self.swivel_position += self.map_to_range(offset_x, -320, 320, -5, 5)
-                self.tilt_position -= self.map_to_range(offset_y, -240, 240, -5, 5)
+                self.swivel_position = self.map_to_range(offset_x, -320, 320, 180, 5)
+                self.tilt_position = self.map_to_range(offset_y, -240, 240, -10, 150)
 
                 # Clamp the values to servo ranges
                 self.swivel_position = max(self.SWIVEL_MIN, min(self.SWIVEL_MAX, self.swivel_position))
@@ -64,16 +65,17 @@ class Eyes(threading.Thread):
                 # Create event for head movement
                 # Create event for head movement
                 event = [
-                    'L', int(0), int(0), int(0), int(0), '|',
-                    'R', int(0), int(0), int(0), int(0), '|',
-                    'S', int(self.swivel_position), '|',
-                    'T', int(self.tilt_position), '|',
-                    'D', 100, '|',  # Adjust duration as needed
+                    'L', int(90), int(0), int(0), int(255), '|',
+                    'R', int(90), int(0), int(0), int(255), '|',
+                    'S', ascii(self.swivel_position), '|',
+                    'T', ascii(self.tilt_position), '|',
+                    'D', ascii(80), '|',  # Adjust duration as needed
                     'E'
                 ]
 
+                print(event)
+
                 response = requests.post(f'{self.thalamus_url}/play_event', json={'event': event})
-                time.sleep(1) # don't overload the head
 
             # Display the video feed with face tracking (optional)
             for (x, y, w, h) in faces:
