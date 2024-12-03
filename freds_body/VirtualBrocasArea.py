@@ -3,9 +3,11 @@ from queue import Queue, Empty
 import threading
 import sys
 import json
+import requests
 
 class VirtualBrocasArea:
-    def __init__(self):
+    def __init__(self, thalamus_url):
+        self.thalamus_url = thalamus_url
         self.transcription_queue = Queue()
         self.response_queue = Queue()
         self.response_thread = threading.Thread(target=self._generate_response)
@@ -18,7 +20,35 @@ class VirtualBrocasArea:
             "content": [
                 {
                     "type": "text",
-                    "text": "You are a robotic assistant managing a robotic head that is named Fred. The head can tilt up and down, turn left and right, and the eyes can change color and brightness. \n\nWhen responding, provide instructions in only JSON format for what the head coordinates and eye color/brightness should be before the response and what head coordinates and eye/color brightness should be after the response to the query. Follow the format in the example below:\n\nExample JSON:\n{\n  \"before\": {\n      \"head_movement\": {\n        \"tilt\": {\n          \"angle\": 10,\n          \"direction\": \"up\"\n        },\n        \"turn\": {\n          \"angle\": 15,\n          \"direction\": \"right\"\n        }\n      },\n      \"eye_settings\": {\n        \"color\": {\n          \"shade\": \"blue\",\n          \"brightness\": 50\n        }\n      }\n  },\n  \"after\": {\n    \"head_movement\": {\n      \"tilt\": {\n        \"angle\": 20,\n        \"direction\": \"up\"\n      },\n      \"turn\": {\n        \"angle\": 5,\n        \"direction\": \"right\"\n      }\n    },\n    \"eye_settings\": {\n      \"color\": {\n        \"shade\": \"brown\",\n        \"brightness\": 20\n      }\n    }\n  },\n\"response\": {response}\n}\n"
+                    "text": """You are a robotic assistant managing a robotic head that is named Fred. The head can tilt up and down, turn left and right, and the eyes can change color and brightness. 
+
+When responding, provide instructions in only JSON format for what the head coordinates and eye color/brightness should be before the response and what head coordinates and eye/color brightness should be after the response to the query. Follow the format in the example below:
+
+Example JSON:
+{
+    "actions": {
+        "head_movement": {
+            "tilt": {
+                "angle": 90,  // 5 to 120 degrees, 5 being up and 120 being down
+            },
+            "swivel": {
+                "angle": 50,  // 5 to 180 degrees, 5 is to the left and 180 is to the right
+            },
+            "duration": 100  // 50 to 200 cycles
+        },
+        "eye_settings": {
+            "color": {
+            "rgb": {
+                "red": 0,  // 0 to 255
+                "green": 128,  // 0 to 255
+                "blue": 255  // 0 to 255
+            },
+            "brightness": 50  // Percentage (0 to 100)
+            }
+        }
+    },
+    "response": {response}
+}"""
                 }
             ]
         })
@@ -62,8 +92,8 @@ class VirtualBrocasArea:
                 )
                 
                 response = json.loads(response.choices[0].message.to_dict()['content'])
-                movement_before = response['before']
-                movement_after = response['after']
+                actions = response['actions']
+                self.make_movement(actions)
                 message = response['response']
 
                 self.context.append({
@@ -77,6 +107,7 @@ class VirtualBrocasArea:
                 })
 
                 self.response_queue.put(message)
+
             except Exception as e:
                 print(f"Error generating response: {e}")
 
@@ -88,3 +119,74 @@ class VirtualBrocasArea:
             return self.response_queue.get_nowait()
         except Empty:
             return None
+        
+    def make_movement(self, json_data):
+        event = []
+        print(json_data)
+        # Left eye settings (assuming the same for both eyes for simplicity)
+        if "eye_settings" in json_data and "color" in json_data["eye_settings"] and "rgb" in json_data["eye_settings"]["color"]:
+            left_rgb = json_data["eye_settings"]["color"]["rgb"]
+            left_brightness = json_data["eye_settings"].get("brightness", 50)  # Default to 50% if not provided
+            event.append('L')
+            event.append(left_brightness)
+            event.append(left_rgb["red"])
+            event.append(left_rgb["green"])
+            event.append(left_rgb["blue"])
+            event.append('|')
+            
+            # Assuming the same settings for the right eye (can be adjusted if right settings differ)
+            right_rgb = json_data["eye_settings"]["color"]["rgb"]
+            right_brightness = json_data["eye_settings"].get("brightness", 50)  # Default to 50% if not provided
+            event.append('R')
+            event.append(right_brightness)
+            event.append(right_rgb["red"])
+            event.append(right_rgb["green"])
+            event.append(right_rgb["blue"])
+            event.append('|')
+        else:
+            event.append('L')
+            event.append(0)
+            event.extend([0,0,0])
+            event.append('|')
+            event.append('R')
+            event.append(0)
+            event.extend([0,0,0])
+            event.append('|')
+        
+        # Tilt settings
+        if "head_movement" in json_data and "tilt" in json_data["head_movement"]:
+            tilt_angle = json_data["head_movement"]["tilt"]["angle"]
+            event.append('T')
+            event.append(ascii(tilt_angle))
+            event.append('|')
+        else:
+            event.append('T')
+            event.append(90)
+            event.append('|')
+        
+        # Swivel settings
+        if "head_movement" in json_data and "swivel" in json_data["head_movement"]:
+            swivel_angle = json_data["head_movement"]["swivel"]["angle"]
+            event.append('S')
+            event.append(ascii(swivel_angle))
+            event.append('|')
+        else:
+            event.append('S')
+            event.append(90)
+            event.append('|')
+        
+        # Duration
+        if "head_movement" in json_data and "duration" in json_data["head_movement"]:
+            duration = json_data["head_movement"]["duration"]
+            event.append('D')
+            event.append(ascii(duration))
+            event.append('|')
+        else:
+            event.append('D')
+            event.append(0)
+            event.append('|')
+        
+        # End of event
+        event.append('E')
+        
+        response = requests.post(f'{self.thalamus_url}/play_event', json={'event': event})

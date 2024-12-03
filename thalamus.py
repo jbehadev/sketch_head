@@ -6,6 +6,7 @@ from typing import List, Union
 import argparse
 import serial
 import sys
+import uvicorn
 
 arg_parse = argparse.ArgumentParser(add_help=False)
 arg_parse.add_argument('--env', required=True)
@@ -40,15 +41,19 @@ class SavedEvent(BaseModel):
 
 @app.post('/play_event')
 def play_event(event: Event):
-    # Play the event
-    write_list(event.event)
-    # Optionally, read from the Arduino if needed
+
+    if type(event.event) == list:
+        write_list(event.event)
+    else:
+        write_list([*event.event])
+    
     while True:
         line = arduino.readline()
         if line == b'':
             break
         else:
             print(line.decode().strip('\r\n'))
+
     return {'status': 'played'}
 
 @app.post('/save_event')
@@ -66,15 +71,15 @@ def clear_events():
     return {'status': 'cleared'}
 
 def write_read(x):
-    if isinstance(x, int):
-        arduino.write(x.to_bytes(1, sys.byteorder))
+    if type(x) == int:
+        arduino.write(x.to_bytes(1, 'little'))
+        print(x.to_bytes(1, 'little'))
     else:
         arduino.write(bytes(x, 'utf-8'))
+        print(bytes(x, 'utf-8'))
 
 def write_list(event_list):
-    for ev in event_list:
-        write_read(ev)
+    [write_read(ev) for ev in event_list]
 
 if __name__ == '__main__':
-    import uvicorn
     uvicorn.run(app, host='0.0.0.0', port=8000)

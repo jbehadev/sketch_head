@@ -30,8 +30,10 @@ def index():
     def write_read(x):
         if type(x) == int:
             arduino.write(x.to_bytes(1, sys.byteorder))
+            print(x.to_bytes(1, sys.byteorder))
         else:
             arduino.write(bytes(x, 'utf-8'))
+            print(bytes(x, 'utf-8'))
 
     def write_list(event_list):
         [write_read(ev) for ev in event_list]
@@ -135,75 +137,74 @@ def index():
             {'name': 'No', 'event': "S20|D40|ES80|D40|E"},
         ]
 
-    app.add_static_files('/static', Path(__file__).resolve().parent / 'static')
-
-    with ui.column():
-
-        with ui.header(elevated=True).style('background-color: #3874c8'):
-            ui.image('/static/fredhead.jpg').style('width:50px')
-            ui.label('Fred Head Control Interface')
-
-        with ui.card():
-            timer = ui.timer(4, lambda: play_event(create_random_event()))
-            ui.switch('Random event generator', value=False).bind_value_to(timer, 'active')
-            ui.label('Random Event Delay')
-            delay_slider = ui.slider(min=2, max=60, value=4).props('label-always').bind_value_to(timer, 'interval')
-
-        with ui.card():
-            ui.label('Tilt')
-            with ui.row().classes('w-full'):
-                with ui.grid(columns=3).classes('w-full'):
-                    ui.label(text="Down").classes('text-right')
-                    tilt_slider = ui.slider(min=1, max=220, value=100).props('label-always').classes('w-full')
-                    ui.label(text="Up")
-
-            ui.label('Swivel')
-            with ui.row().classes('w-full'):
-                with ui.grid(columns=3).classes('w-full'):
-                    ui.label(text="Left").classes('text-right')
-                    swivel_slider = ui.slider(min=1, max=180, value=90).props('label-always').classes('w-full')
-                    ui.label(text="Right")
+    app.add_static_files('../static', Path(__file__).resolve().parent / '../static')
 
 
-            with ui.row().classes('w-full'):
-                with ui.grid(columns=2).classes('w-full'):
-                    with ui.column():
-                        ui.label('Left Eye')
-                        left_color_picker = ui.color_input(label='Right Color', value='#ff0000')
-                        left_color_picker.picker.q_color.props('no-header no-footer default-view=palette')
-                        ui.label('Brightness')
-                        left_brightness_slider = ui.slider(min=0, max=255, value=150).props('label-always')
-                    with ui.column():
-                        ui.label('Right Eye')
-                        right_color_picker = ui.color_input(label='Right Color', value='#ff0000')
-                        right_color_picker.picker.q_color.props('no-header no-footer default-view=palette')
-                        ui.label('Brightness')
-                        right_brightness_slider = ui.slider(min=0, max=255, value=150).props('label-always')
+    with ui.header(elevated=True).style('background-color: #3874c8'):
+        ui.image('../static/fredhead.jpg').style('width:50px')
+        ui.label('Fred Head Control Interface')
 
-            ui.label('Movement speed')
-            duration_slider = ui.radio({400: 'Slow', 150: 'Medium', 50: 'Fast'},value=150).props('inline')
+    with ui.card():
+        timer = ui.timer(4, lambda: play_event(create_random_event()))
+        ui.switch('Random event generator', value=False).bind_value_to(timer, 'active')
+        ui.label('Random Event Delay')
+        delay_slider = ui.slider(min=2, max=60, value=4).props('label-always').bind_value_to(timer, 'interval')
 
-            ui.button('Instruct!', on_click=lambda: play_event(create_event())).classes('w-full')
+    with ui.card():
+        ui.label('Tilt')
+        with ui.row().classes('w-full'):
+            with ui.grid(columns=3).classes('w-full'):
+                ui.label(text="Down").classes('text-right')
+                tilt_slider = ui.slider(min=1, max=220, value=100).props('label-always').classes('w-full')
+                ui.label(text="Up")
 
-        with ui.dialog() as dialog, ui.card():
-            ui.input(label='Event Name', on_change=save_event_name)
-            ui.button('Save', on_click=lambda: save_event(dialog))
-
-        ui.button('Save Event', on_click=dialog.open).classes('w-full')
-
+        ui.label('Swivel')
+        with ui.row().classes('w-full'):
+            with ui.grid(columns=3).classes('w-full'):
+                ui.label(text="Left").classes('text-right')
+                swivel_slider = ui.slider(min=1, max=180, value=90).props('label-always').classes('w-full')
+                ui.label(text="Right")
 
 
-        ui.label('Saved Events - Click to play')
-        event_table = ui.aggrid({'columnDefs': columns, 'rowData':saved_events})
+        with ui.row().classes('w-full'):
+            with ui.grid(columns=2).classes('w-full'):
+                with ui.column():
+                    ui.label('Left Eye')
+                    left_color_picker = ui.color_input(label='Right Color', value='#ff0000')
+                    left_color_picker.picker.q_color.props('no-header no-footer default-view=palette')
+                    ui.label('Brightness')
+                    left_brightness_slider = ui.slider(min=0, max=255, value=150).props('label-always')
+                with ui.column():
+                    ui.label('Right Eye')
+                    right_color_picker = ui.color_input(label='Right Color', value='#ff0000')
+                    right_color_picker.picker.q_color.props('no-header no-footer default-view=palette')
+                    ui.label('Brightness')
+                    right_brightness_slider = ui.slider(min=0, max=255, value=150).props('label-always')
 
-        event_table.on('cellClicked', lambda s: play_event(s['args']['data']['event']))
+        ui.label('Movement speed')
+        duration_slider = ui.radio({400: 'Slow', 150: 'Medium', 50: 'Fast'},value=150).props('inline')
 
-        ui.button('Clear Saved Events', on_click=clear_events )
+        ui.button('Instruct!', on_click=lambda: play_event(create_event())).classes('w-full')
 
-        ui.label('Event Log')
-        log = ui.log(max_lines=1000).classes('w-full h-20')
+    with ui.dialog() as dialog, ui.card():
+        ui.input(label='Event Name', on_change=save_event_name)
+        ui.button('Save', on_click=lambda: save_event(dialog))
 
-        log.push(arduino.readline().decode())
+    ui.button('Save Event', on_click=dialog.open).classes('w-full')
+
+
+
+    ui.label('Saved Events - Click to play')
+    event_table = ui.aggrid({'columnDefs': columns, 'rowData':saved_events})
+
+    event_table.on('cellClicked', lambda s: play_event(s['args']['data']['event']))
+
+    ui.button('Clear Saved Events', on_click=clear_events )
+
+    ui.label('Event Log')
+    log = ui.log(max_lines=1000).classes('w-full h-20')
+
+    log.push(arduino.readline().decode())
 
 
     

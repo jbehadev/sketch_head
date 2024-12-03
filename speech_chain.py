@@ -1,11 +1,14 @@
 import threading
 import time
 
-from freds_body import WernickesArea, BrocasArea, Larynx
+from freds_body import WernickesArea, VirtualBrocasArea, Larynx
+
+thalamus_url = 'http://localhost:8000'
+
 # Example usage:
 listener = WernickesArea(model_name="moonshine/base")
 listener.start_listening()
-responder = BrocasArea()
+responder = VirtualBrocasArea(thalamus_url=thalamus_url)
 responder.start()
 talker = Larynx()
 talker.start()

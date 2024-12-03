@@ -91,20 +91,20 @@ class WernickesArea:
                 if "end" in speech_dict and recording:
                     recording = False
                     transcription = self._transcribe(speech_buffer)
-                    self.transcription_queue.put(transcription)
+                    if "Fred" in transcription:
+                        self.transcription_queue.put(transcription)
                     speech_buffer = np.zeros(0, dtype=np.float32)
 
             elif recording:
                 if (len(speech_buffer) / SAMPLING_RATE) > MAX_SPEECH_SECS:
                     recording = False
                     transcription = self._transcribe(speech_buffer)
-                    self.transcription_queue.put(transcription)
+                    if "Fred" in transcription:
+                        self.transcription_queue.put(transcription)
                     speech_buffer = np.zeros(0, dtype=np.float32)
                     self._soft_reset()
                 
                 if time.time() - self.start_time > PAUSE_DURATION:
-                    #transcription = self._transcribe(speech_buffer)
-                    #self.transcription_queue.put(transcription)
                     self.start_time = time.time()
 
         print("Done Listening")
