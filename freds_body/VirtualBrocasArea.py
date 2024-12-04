@@ -2,13 +2,18 @@ from openai import OpenAI
 from queue import Queue, Empty
 import threading
 import sys
+import math
+import random
 import json
 import requests
 from freds_body import BrocasArea
 from loguru import logger
+from concurrent.futures import ThreadPoolExecutor
+
 
 class VirtualBrocasArea(BrocasArea):
     def init_engine(self):
+        self.executor = ThreadPoolExecutor(max_workers=2)  # Adjust as needed
         self.openai = OpenAI()
         self.context.append({
             'role': 'system',
@@ -29,7 +34,7 @@ Example JSON:
             "swivel": {
                 "angle": 50,  // 5 to 180 degrees, 5 is to the right and 180 is to the left
             },
-            "duration": 100  // 50 to 200 cycles
+            "duration": 50  // 20 to 100 cycles
         },
         "eye_settings": {
             "color": {
@@ -80,9 +85,9 @@ Example JSON:
                 )
                 
                 response = json.loads(response.choices[0].message.to_dict()['content'])
-                actions = response['actions']
-                self.make_movement(actions)
                 message = response['response']
+                actions = response['actions']
+                self.executor.submit(self.make_movement, actions, len(message))
 
                 self.context.append({
                     'role': 'assistant',

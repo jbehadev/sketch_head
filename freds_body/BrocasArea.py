@@ -2,6 +2,8 @@ from queue import Queue, Empty
 import json
 import threading
 import os
+import math
+import random
 from llama_cpp import Llama
 import requests
 from loguru import logger
@@ -77,72 +79,77 @@ class BrocasArea:
         except Empty:
             return None
 
-    def make_movement(self, json_data):
-        event = []
-        # Left eye settings (assuming the same for both eyes for simplicity)
-        if "eye_settings" in json_data and "color" in json_data["eye_settings"] and "rgb" in json_data["eye_settings"]["color"]:
-            left_rgb = json_data["eye_settings"]["color"]["rgb"]
-            left_brightness = json_data["eye_settings"].get("brightness", 50)  # Default to 50% if not provided
-            event.append('L')
-            event.append(left_brightness)
-            event.append(left_rgb["red"])
-            event.append(left_rgb["green"])
-            event.append(left_rgb["blue"])
-            event.append('|')
+    def make_movement(self, json_data, conversation_length):
+        for i in range(0,math.ceil(conversation_length/10)):
+            event = []
+            # Left eye settings (assuming the same for both eyes for simplicity)
+            if "eye_settings" in json_data and "color" in json_data["eye_settings"] and "rgb" in json_data["eye_settings"]["color"]:
+                left_rgb = json_data["eye_settings"]["color"]["rgb"]
+                left_brightness = json_data["eye_settings"].get("brightness", 50)  # Default to 50% if not provided
+                left_brightness = min(100,left_brightness + random.randint(-20,20))
+                event.append('L')
+                event.append(left_brightness)
+                event.append(left_rgb["red"])
+                event.append(left_rgb["green"])
+                event.append(left_rgb["blue"])
+                event.append('|')
+                
+                # Assuming the same settings for the right eye (can be adjusted if right settings differ)
+                right_rgb = json_data["eye_settings"]["color"]["rgb"]
+                right_brightness = json_data["eye_settings"].get("brightness", 50)  # Default to 50% if not provided
+                right_brightness = min(100,right_brightness + random.randint(-20,20))
+                event.append('R')
+                event.append(right_brightness)
+                event.append(right_rgb["red"])
+                event.append(right_rgb["green"])
+                event.append(right_rgb["blue"])
+                event.append('|')
+            else:
+                event.append('L')
+                event.append(0)
+                event.extend([0,0,0])
+                event.append('|')
+                event.append('R')
+                event.append(0)
+                event.extend([0,0,0])
+                event.append('|')
             
-            # Assuming the same settings for the right eye (can be adjusted if right settings differ)
-            right_rgb = json_data["eye_settings"]["color"]["rgb"]
-            right_brightness = json_data["eye_settings"].get("brightness", 50)  # Default to 50% if not provided
-            event.append('R')
-            event.append(right_brightness)
-            event.append(right_rgb["red"])
-            event.append(right_rgb["green"])
-            event.append(right_rgb["blue"])
-            event.append('|')
-        else:
-            event.append('L')
-            event.append(0)
-            event.extend([0,0,0])
-            event.append('|')
-            event.append('R')
-            event.append(0)
-            event.extend([0,0,0])
-            event.append('|')
-        
-        # Tilt settings
-        if "head_movement" in json_data and "tilt" in json_data["head_movement"]:
-            tilt_angle = json_data["head_movement"]["tilt"]["angle"]
-            event.append('T')
-            event.append(ascii(tilt_angle))
-            event.append('|')
-        else:
-            event.append('T')
-            event.append(ascii(90))
-            event.append('|')
-        
-        # Swivel settings
-        if "head_movement" in json_data and "swivel" in json_data["head_movement"]:
-            swivel_angle = json_data["head_movement"]["swivel"]["angle"]
-            event.append('S')
-            event.append(ascii(swivel_angle))
-            event.append('|')
-        else:
-            event.append('S')
-            event.append(ascii(90))
-            event.append('|')
-        
-        # Duration
-        if "head_movement" in json_data and "duration" in json_data["head_movement"]:
-            duration = json_data["head_movement"]["duration"]
-            event.append('D')
-            event.append(ascii(duration))
-            event.append('|')
-        else:
-            event.append('D')
-            event.append(ascii(0))
-            event.append('|')
-        
-        # End of event
-        event.append('E')
-        
-        response = requests.post(f'{self.thalamus_url}/play_event', json={'event': event})
+            # Tilt settings
+            if "head_movement" in json_data and "tilt" in json_data["head_movement"]:
+                tilt_angle = json_data["head_movement"]["tilt"]["angle"]
+                tilt_angle = min(max(tilt_angle + random.randint(-20,20),20),160)
+                event.append('T')
+                event.append(ascii(tilt_angle))
+                event.append('|')
+            else:
+                event.append('T')
+                event.append(ascii(90))
+                event.append('|')
+            
+            # Swivel settings
+            if "head_movement" in json_data and "swivel" in json_data["head_movement"]:
+                swivel_angle = json_data["head_movement"]["swivel"]["angle"]
+                swivel_angle = min(max(swivel_angle + random.randint(-20,20),20),180)
+                event.append('S')
+                event.append(ascii(swivel_angle))
+                event.append('|')
+            else:
+                event.append('S')
+                event.append(ascii(90))
+                event.append('|')
+            
+            # Duration
+            if "head_movement" in json_data and "duration" in json_data["head_movement"]:
+                duration = json_data["head_movement"]["duration"]
+                event.append('D')
+                event.append(ascii(duration))
+                event.append('|')
+            else:
+                event.append('D')
+                event.append(ascii(40))
+                event.append('|')
+            
+            # End of event
+            event.append('E')
+            
+            response = requests.post(f'{self.thalamus_url}/play_event', json={'event': event})

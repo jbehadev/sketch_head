@@ -30,7 +30,7 @@ class WernickesArea:
         self.vad_iterator = VADIterator(
             model=self.vad_model,
             sampling_rate=SAMPLING_RATE,
-            threshold=0.5,
+            threshold=0.7,
             min_silence_duration_ms=700,
         )
 
@@ -97,10 +97,10 @@ class WernickesArea:
         speech = self._denoise_audio(speech)
         # Save speech buffer to file
         timestamp = int(time.time())
-        self._save_speech_to_file(
-            speech,
-            f"speech_{timestamp}.wav"
-        )
+        # self._save_speech_to_file(
+        #     speech,
+        #     f"speech_{timestamp}.wav"
+        # )
         start = time.time()
         tokens = self.model.generate(speech[np.newaxis, :].astype(np.float32))
         logger.info("{file} Transcription ended in {duration} seconds", file=__file__, duration=round(time.time() - start,2))
@@ -130,6 +130,7 @@ class WernickesArea:
             if not recording:
                 speech_buffer = speech_buffer[-lookback_size:]
 
+            start_time = time.time()
             speech_dict = self.vad_iterator(chunk)
             if speech_dict:
                 if "start" in speech_dict and not recording:

@@ -135,7 +135,7 @@ while True:
         executor.submit(ignore_talking_wrapper, response)
         last_response = time.time()
 
-    if last_response is not None and (time.time() - last_response) > 20:
+    if last_response is not None and (time.time() - last_response) > 20 and talker.is_busy is False:
         done_talking()
         last_response = None
        
