@@ -1,4 +1,5 @@
 import threading
+import subprocess
 from concurrent.futures import ThreadPoolExecutor
 import time
 import requests
@@ -89,10 +90,13 @@ def ignore_talking_wrapper(response):
     listener.pause = False
     logger.info('{file} Turning on hearing', file=__file__)
 
+#subprocess.run(["amixer", "set", "Master", "100%"]) 
+
 executor = ThreadPoolExecutor(max_workers=2)  # Adjust as needed
 last_response = None
 # Example usage:
 listener = WernickesArea(model_name="moonshine/base")
+#listener = VirtualWernickesArea()
 listener.start_listening()
 responder = VirtualBrocasArea(thalamus_url=thalamus_url)
 responder.start()
@@ -100,12 +104,20 @@ talker = VirtualLarynx()
 talker.start()
 vision = Eyes(thalamus_url=thalamus_url)
 vision.start()
-executor.submit(ignore_talking_wrapper, 'Welcome all! I have a brain now.')
+executor.submit(ignore_talking_wrapper, 'Hello World! Welcome all! If you have not met me, my name is Fred. For those that have met me, I have developed a brain now.')
 while True:
     transcription = listener.get_transcription()
     if transcription:
         logger.info('{file} Transcription: {transcription}', file=__file__, transcription=transcription)
-        if all(x in transcription for x in ["get", "in", "the", "bag"]):
+        if all(x in transcription for x in ["listen", "directly"]):
+            executor.submit(ignore_talking_wrapper, "I am all ears!")
+            listener.listen_all_the_time = True
+            continue
+        elif all(x in transcription for x in ["listen", "carefully"]):
+            executor.submit(ignore_talking_wrapper, "Sorry, I will be more careful.")
+            listener.listen_all_the_time = True
+            continue
+        elif all(x in transcription for x in ["get", "in", "the", "bag"]):
             bag_trick()
             continue
         elif all(x in transcription for x in ["creep", "mode", "on"]):
@@ -123,7 +135,7 @@ while True:
         executor.submit(ignore_talking_wrapper, response)
         last_response = time.time()
 
-    if last_response is not None and (time.time() - last_response) > 15:
+    if last_response is not None and (time.time() - last_response) > 20:
         done_talking()
         last_response = None
        
