@@ -1,12 +1,12 @@
 import threading
 import time
 
-from freds_body import BrocasArea, Larynx
+from freds_body import VirtualBrocasArea, Larynx
 
 thalamus_url = 'http://localhost:8000'
 
 # Example usage:
-responder = BrocasArea(thalamus_url=thalamus_url)
+responder = VirtualBrocasArea(thalamus_url=thalamus_url)
 responder.start()
 
 talker = Larynx()

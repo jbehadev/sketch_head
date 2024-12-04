@@ -1,222 +1,442 @@
 [
   {
     "emotion": "Happy",
-    "before": {
-      "head": {"yaw": 0, "pitch": 0, "roll": 0},
-      "eyes": {"color": "#FFFF99", "brightness": 0.7}
+    "head_movement": {
+      "tilt": {
+        "angle": 56.2  // 5 to 120 degrees, 5 being up and 120 being down
+      },
+      "swivel": {
+        "angle": 106.4  // 5 to 180 degrees, 5 is to the left and 180 is to the right
+      },
+      "duration": 100  // 50 to 200 cycles
     },
-    "after": {
-      "head": {"yaw": 15, "pitch": -10, "roll": 0},
-      "eyes": {"color": "#FFFF00", "brightness": 1.0}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 255,   // 0 to 255
+          "green": 255,
+          "blue": 0
+        }
+      },
+      "brightness": 100  // Percentage (0 to 100)
     }
   },
   {
     "emotion": "Sad",
-    "before": {
-      "head": {"yaw": 0, "pitch": -5, "roll": 0},
-      "eyes": {"color": "#87CEFA", "brightness": 0.5}
+    "head_movement": {
+      "tilt": {
+        "angle": 69.4
+      },
+      "swivel": {
+        "angle": 92.5
+      },
+      "duration": 120
     },
-    "after": {
-      "head": {"yaw": 0, "pitch": 10, "roll": 0},
-      "eyes": {"color": "#0000FF", "brightness": 0.3}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 0,
+          "green": 0,
+          "blue": 255
+        }
+      },
+      "brightness": 30
     }
   },
   {
     "emotion": "Angry",
-    "before": {
-      "head": {"yaw": 0, "pitch": 0, "roll": 5},
-      "eyes": {"color": "#FFA07A", "brightness": 0.6}
+    "head_movement": {
+      "tilt": {
+        "angle": 62.5
+      },
+      "swivel": {
+        "angle": 72.6
+      },
+      "duration": 80
     },
-    "after": {
-      "head": {"yaw": -20, "pitch": 0, "roll": 5},
-      "eyes": {"color": "#FF0000", "brightness": 0.9}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 255,
+          "green": 0,
+          "blue": 0
+        }
+      },
+      "brightness": 90
     }
   },
   {
     "emotion": "Fearful",
-    "before": {
-      "head": {"yaw": 0, "pitch": 5, "roll": 0},
-      "eyes": {"color": "#FFFFFF", "brightness": 0.7}
+    "head_movement": {
+      "tilt": {
+        "angle": 52.7
+      },
+      "swivel": {
+        "angle": 82.6
+      },
+      "duration": 110
     },
-    "after": {
-      "head": {"yaw": -10, "pitch": 15, "roll": 0},
-      "eyes": {"color": "#ADD8E6", "brightness": 1.0}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 173,
+          "green": 216,
+          "blue": 230
+        }
+      },
+      "brightness": 100
     }
   },
   {
     "emotion": "Disgusted",
-    "before": {
-      "head": {"yaw": 5, "pitch": 0, "roll": -5},
-      "eyes": {"color": "#ADFF2F", "brightness": 0.5}
+    "head_movement": {
+      "tilt": {
+        "angle": 59.0
+      },
+      "swivel": {
+        "angle": 101.7
+      },
+      "duration": 90
     },
-    "after": {
-      "head": {"yaw": 15, "pitch": 5, "roll": -10},
-      "eyes": {"color": "#556B2F", "brightness": 0.4}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 85,
+          "green": 107,
+          "blue": 47
+        }
+      },
+      "brightness": 40
     }
   },
   {
     "emotion": "Confused",
-    "before": {
-      "head": {"yaw": 0, "pitch": -5, "roll": 5},
-      "eyes": {"color": "#E0FFFF", "brightness": 0.6}
+    "head_movement": {
+      "tilt": {
+        "angle": 62.5
+      },
+      "swivel": {
+        "angle": 95.3
+      },
+      "duration": 130
     },
-    "after": {
-      "head": {"yaw": 5, "pitch": 0, "roll": 15},
-      "eyes": {"color": "#B0E0E6", "brightness": 0.7}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 176,
+          "green": 224,
+          "blue": 230
+        }
+      },
+      "brightness": 70
     }
   },
   {
     "emotion": "Bored",
-    "before": {
-      "head": {"yaw": -5, "pitch": 5, "roll": 0},
-      "eyes": {"color": "#C0C0C0", "brightness": 0.5}
+    "head_movement": {
+      "tilt": {
+        "angle": 55.5
+      },
+      "swivel": {
+        "angle": 84.5
+      },
+      "duration": 150
     },
-    "after": {
-      "head": {"yaw": -15, "pitch": 10, "roll": 0},
-      "eyes": {"color": "#808080", "brightness": 0.4}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 128,
+          "green": 128,
+          "blue": 128
+        }
+      },
+      "brightness": 40
     }
   },
   {
     "emotion": "Excited",
-    "before": {
-      "head": {"yaw": 10, "pitch": -10, "roll": 0},
-      "eyes": {"color": "#FFA500", "brightness": 0.8}
+    "head_movement": {
+      "tilt": {
+        "angle": 52.7
+      },
+      "swivel": {
+        "angle": 101.7
+      },
+      "duration": 70
     },
-    "after": {
-      "head": {"yaw": 20, "pitch": -15, "roll": 0},
-      "eyes": {"color": "#FF4500", "brightness": 1.0}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 255,
+          "green": 69,
+          "blue": 0
+        }
+      },
+      "brightness": 100
     }
   },
   {
     "emotion": "Sleepy",
-    "before": {
-      "head": {"yaw": 0, "pitch": 10, "roll": 0},
-      "eyes": {"color": "#708090", "brightness": 0.3}
+    "head_movement": {
+      "tilt": {
+        "angle": 76.2
+      },
+      "swivel": {
+        "angle": 92.5
+      },
+      "duration": 180
     },
-    "after": {
-      "head": {"yaw": 0, "pitch": 20, "roll": 0},
-      "eyes": {"color": "#2F4F4F", "brightness": 0.2}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 47,
+          "green": 79,
+          "blue": 79
+        }
+      },
+      "brightness": 20
     }
   },
   {
     "emotion": "Curious",
-    "before": {
-      "head": {"yaw": 5, "pitch": -5, "roll": 5},
-      "eyes": {"color": "#40E0D0", "brightness": 0.6}
+    "head_movement": {
+      "tilt": {
+        "angle": 55.5
+      },
+      "swivel": {
+        "angle": 98.1
+      },
+      "duration": 90
     },
-    "after": {
-      "head": {"yaw": 10, "pitch": -10, "roll": 10},
-      "eyes": {"color": "#00CED1", "brightness": 0.7}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 0,
+          "green": 206,
+          "blue": 209
+        }
+      },
+      "brightness": 70
     }
   },
   {
     "emotion": "Annoyed",
-    "before": {
-      "head": {"yaw": -5, "pitch": 5, "roll": 5},
-      "eyes": {"color": "#CD5C5C", "brightness": 0.5}
+    "head_movement": {
+      "tilt": {
+        "angle": 65.9
+      },
+      "swivel": {
+        "angle": 84.5
+      },
+      "duration": 100
     },
-    "after": {
-      "head": {"yaw": -15, "pitch": 5, "roll": 5},
-      "eyes": {"color": "#8B0000", "brightness": 0.6}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 139,
+          "green": 0,
+          "blue": 0
+        }
+      },
+      "brightness": 60
     }
   },
   {
     "emotion": "Shocked",
-    "before": {
-      "head": {"yaw": 0, "pitch": -10, "roll": 0},
-      "eyes": {"color": "#FFFFFF", "brightness": 0.8}
+    "head_movement": {
+      "tilt": {
+        "angle": 43.0
+      },
+      "swivel": {
+        "angle": 92.5
+      },
+      "duration": 100
     },
-    "after": {
-      "head": {"yaw": 0, "pitch": -25, "roll": 0},
-      "eyes": {"color": "#FFFFFF", "brightness": 1.0}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 255,
+          "green": 255,
+          "blue": 255
+        }
+      },
+      "brightness": 100
     }
   },
   {
     "emotion": "Proud",
-    "before": {
-      "head": {"yaw": 0, "pitch": -5, "roll": 0},
-      "eyes": {"color": "#DAA520", "brightness": 0.7}
+    "head_movement": {
+      "tilt": {
+        "angle": 59.0
+      },
+      "swivel": {
+        "angle": 95.3
+      },
+      "duration": 90
     },
-    "after": {
-      "head": {"yaw": 5, "pitch": -10, "roll": 0},
-      "eyes": {"color": "#FFD700", "brightness": 0.9}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 255,
+          "green": 215,
+          "blue": 0
+        }
+      },
+      "brightness": 90
     }
   },
   {
     "emotion": "Ashamed",
-    "before": {
-      "head": {"yaw": 0, "pitch": 10, "roll": 0},
-      "eyes": {"color": "#FFB6C1", "brightness": 0.5}
+    "head_movement": {
+      "tilt": {
+        "angle": 72.9
+      },
+      "swivel": {
+        "angle": 89.7
+      },
+      "duration": 120
     },
-    "after": {
-      "head": {"yaw": -5, "pitch": 15, "roll": 0},
-      "eyes": {"color": "#FFC0CB", "brightness": 0.4}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 255,
+          "green": 192,
+          "blue": 203
+        }
+      },
+      "brightness": 40
     }
   },
   {
     "emotion": "Anxious",
-    "before": {
-      "head": {"yaw": -5, "pitch": 5, "roll": 0},
-      "eyes": {"color": "#B0C4DE", "brightness": 0.5}
+    "head_movement": {
+      "tilt": {
+        "angle": 69.4
+      },
+      "swivel": {
+        "angle": 87.0
+      },
+      "duration": 140
     },
-    "after": {
-      "head": {"yaw": -10, "pitch": 10, "roll": 0},
-      "eyes": {"color": "#4682B4", "brightness": 0.6}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 70,
+          "green": 130,
+          "blue": 180
+        }
+      },
+      "brightness": 60
     }
   },
   {
     "emotion": "Thoughtful",
-    "before": {
-      "head": {"yaw": 5, "pitch": 0, "roll": 5},
-      "eyes": {"color": "#8FBC8F", "brightness": 0.6}
+    "head_movement": {
+      "tilt": {
+        "angle": 62.5
+      },
+      "swivel": {
+        "angle": 98.1
+      },
+      "duration": 130
     },
-    "after": {
-      "head": {"yaw": 10, "pitch": 0, "roll": 10},
-      "eyes": {"color": "#556B2F", "brightness": 0.5}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 85,
+          "green": 107,
+          "blue": 47
+        }
+      },
+      "brightness": 50
     }
   },
   {
     "emotion": "Amused",
-    "before": {
-      "head": {"yaw": 5, "pitch": -5, "roll": 0},
-      "eyes": {"color": "#FF69B4", "brightness": 0.6}
+    "head_movement": {
+      "tilt": {
+        "angle": 55.5
+      },
+      "swivel": {
+        "angle": 106.4
+      },
+      "duration": 90
     },
-    "after": {
-      "head": {"yaw": 15, "pitch": -10, "roll": 0},
-      "eyes": {"color": "#FF1493", "brightness": 0.8}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 255,
+          "green": 20,
+          "blue": 147
+        }
+      },
+      "brightness": 80
     }
   },
   {
     "emotion": "Love",
-    "before": {
-      "head": {"yaw": 0, "pitch": -5, "roll": 0},
-      "eyes": {"color": "#FF69B4", "brightness": 0.7}
+    "head_movement": {
+      "tilt": {
+        "angle": 59.0
+      },
+      "swivel": {
+        "angle": 95.3
+      },
+      "duration": 80
     },
-    "after": {
-      "head": {"yaw": 5, "pitch": -10, "roll": 0},
-      "eyes": {"color": "#FF1493", "brightness": 1.0}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 255,
+          "green": 20,
+          "blue": 147
+        }
+      },
+      "brightness": 100
     }
   },
   {
     "emotion": "Neutral",
-    "before": {
-      "head": {"yaw": 0, "pitch": 0, "roll": 0},
-      "eyes": {"color": "#FFFFFF", "brightness": 0.5}
+    "head_movement": {
+      "tilt": {
+        "angle": 62.5
+      },
+      "swivel": {
+        "angle": 92.5
+      },
+      "duration": 100
     },
-    "after": {
-      "head": {"yaw": 0, "pitch": 0, "roll": 0},
-      "eyes": {"color": "#FFFFFF", "brightness": 0.5}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 255,
+          "green": 255,
+          "blue": 255
+        }
+      },
+      "brightness": 50
     }
   },
   {
     "emotion": "Surprised",
-    "before": {
-      "head": {"yaw": 0, "pitch": 0, "roll": 0},
-      "eyes": {"color": "#00BFFF", "brightness": 0.5}
+    "head_movement": {
+      "tilt": {
+        "angle": 49.7
+      },
+      "swivel": {
+        "angle": 92.5
+      },
+      "duration": 100
     },
-    "after": {
-      "head": {"yaw": 0, "pitch": -20, "roll": 0},
-      "eyes": {"color": "#FFFFFF", "brightness": 1.0}
+    "eye_settings": {
+      "color": {
+        "rgb": {
+          "red": 255,
+          "green": 255,
+          "blue": 255
+        }
+      },
+      "brightness": 100
     }
   }
 ]

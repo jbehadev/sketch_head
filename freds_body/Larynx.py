@@ -4,7 +4,7 @@ import sherpa_onnx
 import simpleaudio as sa
 import numpy as np
 import soundfile as sf
-
+from loguru import logger
 
 SAMPLING_RATE = 16000
 

@@ -7,8 +7,7 @@ import wave
 from io import BytesIO
 import tempfile
 import simpleaudio as sa
-
-
+from loguru import logger
 
 SAMPLING_RATE = 16000
 
@@ -38,7 +37,7 @@ class VirtualLarynx:
             self.is_busy = True
             response =  self.tts.audio.speech.create(
                     model="tts-1",
-                    voice="nova",
+                    voice="fable",
                     input=response,
                     response_format="wav"
             ) 
@@ -58,7 +57,7 @@ class VirtualLarynx:
                     play_obj = sa.play_buffer(pcm_data, num_channels, sample_width, frame_rate)
                     play_obj.wait_done()
             except Exception as e:
-                print(e)
+                logger.info("{file} Error generating response: {e}", file=__file__, e=e)
             finally:
                 # Clean up the temporary file
                 os.remove(temp_audio_path)

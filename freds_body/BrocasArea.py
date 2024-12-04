@@ -4,6 +4,7 @@ import threading
 import os
 from llama_cpp import Llama
 import requests
+from loguru import logger
 
 class BrocasArea:
     def __init__(self, thalamus_url):
@@ -14,49 +15,13 @@ class BrocasArea:
         self.response_thread.daemon = True
         self.stop_event = threading.Event()
         self.context = []
-        self.context.append({
-            'role': 'system',
-            "content": [
-                {
-                    "type": "text",
-                    "text": """You are a robotic assistant managing a robotic head that is named Fred. The head can tilt up and down, turn left and right, and the eyes can change color and brightness. 
 
-When responding, provide instructions in only JSON format for what the head coordinates and eye color/brightness should be before the response and what head coordinates and eye/color brightness should be after the response to the query. Follow the format in the example below:
-
-Example JSON:
-{
-    "actions": {
-        "head_movement": {
-            "tilt": {
-                "angle": 90,  // 5 to 120 degrees, 5 being up and 120 being down
-            },
-            "swivel": {
-                "angle": 50,  // 5 to 180 degrees, 5 is to the left and 180 is to the right
-            },
-            "duration": 100  // 50 to 200 cycles
-        },
-        "eye_settings": {
-            "color": {
-            "rgb": {
-                "red": 0,  // 0 to 255
-                "green": 128,  // 0 to 255
-                "blue": 255  // 0 to 255
-            },
-            "brightness": 50  // Percentage (0 to 100)
-            }
-        }
-    },
-    "response": {response}
-}"""
-                }
-            ]
-        })
         self.init_engine()
 
     def init_engine(self):
         
         self.model = Llama(
-            model_path="models/phi-2.Q8_0.gguf",
+            model_path="models/phi-2.Q4_0.gguf",
             max_tokens=2048,
             temperature=0.7,
             top_p=0.9,
@@ -72,6 +37,18 @@ Example JSON:
         self.stop_event.set()
         self.response_thread.join()
 
+    def wrapper(self, statement):
+        return f"Please return an emotion like EMOTION: [emotion] then the response to this query: {statement}\nOutput:"
+    
+    def template(self, statement):
+            return [
+                {"role": "system", "content": "When responding, please respond with EMOTION: {emotion of response}\n response to the query"},
+                {
+                    "role": "user",
+                    "content": statement
+                }
+            ]
+
     def _generate_response(self):
         while not self.stop_event.is_set():
             try:
@@ -79,34 +56,17 @@ Example JSON:
             except Empty:
                 continue
             
-            print('Brocas is thinking')
-            self.context.append({
-                'role': 'user',
-                "content": [
-                    {
-                        "type": "text",
-                        "text": transcription
-                    }
-                ]
-            })
+            logger.info('{file} Brocas is thinking', file=__file__)
+            
             llm_response = ""
-            #llm_response = self.model(transcription)
-            for token in self.model(json.dumps(self.context), max_tokens=2048, stream=True):
+            for token in self.model(self.wrapper(transcription), stream=True):
                 llm_response += token['choices'][0]['text']
-
-            self.context.append({
-                'role': 'assistant',
-                "content": [
-                    {
-                        "type": "text",
-                        "text": llm_response
-                    }
-                ]
-            })
+            #llm_response =  self.model.create_chat_completion(
+                #messages = self.template(transcription)
+            #)
 
             # Put the response in the response queue
             self.response_queue.put(llm_response)
-            print(llm_response)
 
     def add_transcription(self, transcription):
         self.transcription_queue.put(transcription)
@@ -119,7 +79,6 @@ Example JSON:
 
     def make_movement(self, json_data):
         event = []
-        print(json_data)
         # Left eye settings (assuming the same for both eyes for simplicity)
         if "eye_settings" in json_data and "color" in json_data["eye_settings"] and "rgb" in json_data["eye_settings"]["color"]:
             left_rgb = json_data["eye_settings"]["color"]["rgb"]

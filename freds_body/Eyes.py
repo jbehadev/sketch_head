@@ -3,6 +3,7 @@ import threading
 import requests
 from picamera2 import Picamera2
 import time
+from loguru import logger
 
 class Eyes(threading.Thread):
     def __init__(self, thalamus_url):
@@ -25,6 +26,7 @@ class Eyes(threading.Thread):
         self.camera = Picamera2()
         self.camera.configure(self.camera.create_preview_configuration(main={"format": "RGB888", "size": (640, 480)}))
         self.camera.start()
+        self.tracking_on = False
 
     def map_to_range(self, value, in_min, in_max, out_min, out_max):
         """Map a value from one range to another."""
@@ -53,7 +55,6 @@ class Eyes(threading.Thread):
                 offset_x = face_center_x - 640 / 2  # Frame width = 640
                 offset_y = face_center_y - 480 / 2  # Frame height = 480
 
-                print(f"found a face at {offset_x}, {offset_y}")
                 # Map offsets to servo positions
                 self.swivel_position = self.map_to_range(offset_x, -320, 320, 180, 5)
                 self.tilt_position = self.map_to_range(offset_y, -240, 240, -10, 150)
@@ -64,18 +65,19 @@ class Eyes(threading.Thread):
 
                 # Create event for head movement
                 # Create event for head movement
+
                 event = [
                     'L', int(90), int(0), int(0), int(255), '|',
                     'R', int(90), int(0), int(0), int(255), '|',
                     'S', ascii(self.swivel_position), '|',
                     'T', ascii(self.tilt_position), '|',
-                    'D', ascii(80), '|',  # Adjust duration as needed
+                    'D', ascii(40), '|',  # Adjust duration as needed
                     'E'
                 ]
 
-                print(event)
-
-                response = requests.post(f'{self.thalamus_url}/play_event', json={'event': event})
+                if self.tracking_on:
+                    logger.info('{file} found a face at {offset_x}, {offset_y}', file=__file__, offset_x=offset_x, offset_y=offset_y)
+                    response = requests.post(f'{self.thalamus_url}/play_event', json={'event': event})
 
             # Display the video feed with face tracking (optional)
             for (x, y, w, h) in faces:

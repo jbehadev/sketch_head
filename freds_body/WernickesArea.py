@@ -5,6 +5,7 @@ from queue import Queue, Empty
 from sounddevice import InputStream
 from silero_vad import VADIterator, load_silero_vad
 from moonshine_onnx import MoonshineOnnxModel, load_tokenizer
+from loguru import logger
 
 SAMPLING_RATE = 16000
 CHUNK_SIZE = 512
@@ -60,7 +61,7 @@ class WernickesArea:
 
     def _input_callback(self, indata, frames, time, status):
         if status:
-            print("Status: ", status)
+            logger.info("{file} Status: {status}", file=__file__, status=status)
         if not self.pause:
             self.queue.put((indata.copy().flatten(), status))
 
@@ -68,14 +69,14 @@ class WernickesArea:
         with self.transcribe_lock:
             start = time.time()
             tokens = self.model.generate(speech[np.newaxis, :].astype(np.float32))
-            print(f"Transcription ended in {round(time.time() - start,2)} seconds")
+            logger.info("{file} Transcription ended in {duration} seconds", file=__file__, duration=round(time.time() - start,2))
             return self.tokenizer.decode_batch(tokens)[0]
 
     def _listen(self):
         speech_buffer = np.zeros(0, dtype=np.float32)
         recording = False
         lookback_size = LOOKBACK_CHUNKS * CHUNK_SIZE
-        print("Listening")
+        logger.info("{file} Listening", file=__file__)
 
         while not self.stop_event.is_set():
             try:
@@ -100,25 +101,25 @@ class WernickesArea:
                     if "Fred" in transcription:
                         self.transcription_queue.put(transcription)
                     else:
-                        print(F"Throwing away: {transcription}")
+                        logger.info("{file} Throwing away: {transcription}", file=__file__, transcription=transcription)
                     speech_buffer = np.zeros(0, dtype=np.float32)
 
             elif recording:
                 if (len(speech_buffer) / SAMPLING_RATE) > MAX_SPEECH_SECS:
-                    print("Speech timeout")
+                    logger.info("{file} Speech timeout", file=__file__)
                     recording = False
                     transcription = self._transcribe(speech_buffer)
                     if "Fred" in transcription:
                         self.transcription_queue.put(transcription)
                     else:
-                        print(F"Throwing away: {transcription}")
+                        logger.info("{file} Throwing away: {transcription}", file=__file__, transcription=transcription)
                     speech_buffer = np.zeros(0, dtype=np.float32)
                     self._soft_reset()
                 
                 if time.time() - self.start_time > PAUSE_DURATION:
                     self.start_time = time.time()
 
-        print("Done Listening")
+        logger.info("{file} Done Listening", file=__file__)
 
     def get_transcription(self):
         try:
