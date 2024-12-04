@@ -57,3 +57,4 @@ build/
 __pycache__
 **/models
 **/*.log
+**/saved_audio

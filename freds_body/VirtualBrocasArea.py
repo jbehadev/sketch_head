@@ -24,7 +24,7 @@ Example JSON:
     "actions": {
         "head_movement": {
             "tilt": {
-                "angle": 90,  // 5 to 120 degrees, 5 being up and 120 being down
+                "angle": 90,  // 5 to 120 degrees, 5 is tilting the head up and 160 tilting the head down
             },
             "swivel": {
                 "angle": 50,  // 5 to 180 degrees, 5 is to the right and 180 is to the left

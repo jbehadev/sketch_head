@@ -3,7 +3,7 @@ from queue import Queue, Empty
 import sherpa_onnx
 import simpleaudio as sa
 import numpy as np
-import soundfile as sf
+import time
 from loguru import logger
 
 SAMPLING_RATE = 16000
@@ -45,7 +45,10 @@ class Larynx:
 
             # Convert text to speech using Sherpa-ONNX TTS
             if response:
+                start_time = time.time()
+                logger.info("{file} Generating audio for {response}", file=__file__, response=response)
                 audio = self.tts.generate(response)
+                logger.info("{file} Audio generation took {duration}", file=__file__, response=response, duration=round(time.time() - start_time,2))
                 self._play_audio(audio)
 
     def _play_audio(self, audio):

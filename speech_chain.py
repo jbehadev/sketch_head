@@ -1,4 +1,5 @@
 import threading
+from concurrent.futures import ThreadPoolExecutor
 import time
 import requests
 from freds_body import WernickesArea, VirtualBrocasArea, VirtualLarynx, Eyes
@@ -16,6 +17,9 @@ def done_talking():
     event.append(40)
     event.extend([255,255,255])
     event.append('|')
+    event.append('S')
+    event.append(ascii(90))
+    event.append('|')
     event.append('D')
     event.append(ascii(10))
     event.append('|')
@@ -23,6 +27,8 @@ def done_talking():
     response = requests.post(f'{thalamus_url}/play_event', json={'event': event})
 
 def bag_trick():
+    executor.submit(ignore_talking_wrapper, "No! Why do I have to get in the bag? You get in the bag!")
+
     event = []
     event.append('L')
     event.append(100)
@@ -52,7 +58,6 @@ def bag_trick():
     event.append(ascii(120))
     event.append('|')
     event.append('E')
-    ignore_talking_wrapper("No![pause] No![pause] No![pause] No!")
 
     response = requests.post(f'{thalamus_url}/play_event', json={'event': event})
     event = []
@@ -84,6 +89,8 @@ def ignore_talking_wrapper(response):
     listener.pause = False
     logger.info('{file} Turning on hearing', file=__file__)
 
+executor = ThreadPoolExecutor(max_workers=2)  # Adjust as needed
+last_response = None
 # Example usage:
 listener = WernickesArea(model_name="moonshine/base")
 listener.start_listening()
@@ -93,7 +100,7 @@ talker = VirtualLarynx()
 talker.start()
 vision = Eyes(thalamus_url=thalamus_url)
 vision.start()
-ignore_talking_wrapper('Welcome all! I have a brain now.')
+executor.submit(ignore_talking_wrapper, 'Welcome all! I have a brain now.')
 while True:
     transcription = listener.get_transcription()
     if transcription:
@@ -102,19 +109,22 @@ while True:
             bag_trick()
             continue
         elif all(x in transcription for x in ["creep", "mode", "on"]):
-            ignore_talking_wrapper("I see you!")
+            executor.submit(ignore_talking_wrapper, "I see you!")
             vision.tracking_on = True 
             continue   
         elif all(x in transcription for x in ["creep", "mode", "off"]):
-            ignore_talking_wrapper("Where did you go?")
+            executor.submit(ignore_talking_wrapper, "Where did you go?")
             vision.tracking_on = False 
             continue 
         responder.add_transcription(transcription)
     response = responder.get_response()
     if response:
         logger.info('{file} Response: {response}', file=__file__, response=response)
-        ignore_talking_wrapper(response)
-        done_talking()
+        executor.submit(ignore_talking_wrapper, response)
+        last_response = time.time()
 
+    if last_response is not None and (time.time() - last_response) > 15:
+        done_talking()
+        last_response = None
        
         
